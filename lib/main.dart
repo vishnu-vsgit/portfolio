@@ -848,13 +848,12 @@ class _PortfolioShellState extends State<PortfolioShell>
         title: "Visual Compiler",
         subtitle: "Layout Engine & LLM Guardrails // Mini Project",
         description:
-            "A canvas-based editor that lets developers compile visual UI mockups into clean codebase templates. Minimizes compiler model generation hallucinations using automated structure validation guards.",
+            "A canvas-based editor that lets developers compile visual UI mockups into clean codebase templates.Reduce hallucinations.",
         accomplishments: [
           "Designed custom visual layout generation engine.",
-          "Implemented verification prompts to verify syntax structure.",
           "Reduced compiler generation hallucinations by 80%.",
         ],
-        technologies: ["Flutter", "Dart", "HTML5", "Code Gen"],
+        technologies: ["Flutter", "Dart", "Python"],
         icon: Icons.code,
       ),
       ProjectDetail(
@@ -875,12 +874,8 @@ class _PortfolioShellState extends State<PortfolioShell>
         title: "6G Congestion Control",
         subtitle: "Predictive Control // Active R&D Project",
         description:
-            "Active research framework forecasting network load peaks on 6G bands. Dynamically triggers real-time packet re-routing before latency limits are crossed.",
-        accomplishments: [
-          "Created traffic forecasting graph neural networks.",
-          "Intercepted network capacity limit warnings dynamically.",
-          "Prevented packet loss and latency spikes under load.",
-        ],
+            "A Multi-Agent Framework for network slicing, Congestion Prediction and Prevention.",
+
         technologies: ["6G networks", "GNNs", "Network Routing", "Python"],
         icon: Icons.settings_input_antenna,
       ),
