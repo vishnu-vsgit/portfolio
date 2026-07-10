@@ -876,7 +876,7 @@ class _PortfolioShellState extends State<PortfolioShell>
         description:
             "A Multi-Agent Framework for network slicing, Congestion Prediction and Prevention.",
         accomplishments: ["On Development."],
-        technologies: ["6G networks", "GNNs", "Network Routing", "Python"],
+        technologies: ["6G networks", "Network Routing"],
         icon: Icons.settings_input_antenna,
       ),
     ];
