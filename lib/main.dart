@@ -317,7 +317,7 @@ class _PortfolioShellState extends State<PortfolioShell>
             Positioned.fill(
               child: AuroraBackground(child: const ThreeDParticleBackground()),
             ),
-  
+
             // Main Layout Viewport
             Positioned.fill(
               child: isMobile
@@ -861,12 +861,8 @@ class _PortfolioShellState extends State<PortfolioShell>
         title: "AV Perception",
         subtitle: "AI Perception & Edge Privacy // Internship Project",
         description:
-            "Research internship adapting autonomous vehicle camera feeds. Integrates centralized neural learning updates with local, edge-level plate and facial identity data anonymization.",
-        accomplishments: [
-          "Configured camera object detection models at edge.",
-          "Automated facial and license plate pixel anonymization.",
-          "Protected telemetry privacy before central server sync.",
-        ],
+            "Worked on an AI research project focused on autonomous vehicle perception, centralized learning, and data anonymization at AI NEST Research Lab, Amrita Vishwa Vidyapeetham.",
+        accomplishments: ["Learned AI research methodologies."],
         technologies: [
           "Vision AI",
           "PyTorch",
