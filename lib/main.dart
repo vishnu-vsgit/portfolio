@@ -875,7 +875,7 @@ class _PortfolioShellState extends State<PortfolioShell>
         subtitle: "Predictive Control // Active R&D Project",
         description:
             "A Multi-Agent Framework for network slicing, Congestion Prediction and Prevention.",
-
+        accomplishments: ["On Development."],
         technologies: ["6G networks", "GNNs", "Network Routing", "Python"],
         icon: Icons.settings_input_antenna,
       ),
