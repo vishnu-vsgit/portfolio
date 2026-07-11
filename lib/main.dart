@@ -68,16 +68,7 @@ class _PortfolioShellState extends State<PortfolioShell>
     "UI/UX DESIGNER",
   ];
 
-  // Contact Form parameters
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _messageController = TextEditingController();
-  bool _isTransmitting = false;
-  bool _transmissionCompleted = false;
-  final List<String> _transmissionLogs = [];
-  Timer? _transmissionTimer;
-  int _logIndex = 0;
+
 
   // Skills console state
   int _selectedSkillIndex = 0;
@@ -141,13 +132,9 @@ class _PortfolioShellState extends State<PortfolioShell>
   @override
   void dispose() {
     _typewriterTimer.cancel();
-    _transmissionTimer?.cancel();
     _consoleTimer?.cancel();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    _nameController.dispose();
-    _emailController.dispose();
-    _messageController.dispose();
     super.dispose();
   }
 
@@ -259,69 +246,10 @@ class _PortfolioShellState extends State<PortfolioShell>
     });
   }
 
-  void _startTransmissionSequence() {
-    if (!_formKey.currentState!.validate()) return;
-
-    final String name = _nameController.text;
-    final String email = _emailController.text;
-    final String message = _messageController.text;
-
-    setState(() {
-      _isTransmitting = true;
-      _transmissionCompleted = false;
-      _transmissionLogs.clear();
-      _transmissionLogs.add("SYS: INITIALIZING SECURE COMMUNICATION...");
-      _logIndex = 0;
-    });
-
-    final steps = [
-      "SYS: GENERATING RSA-4096 CONDUIT SIGNATURE...",
-      "SYS: SHAKING HANDS WITH ROUTER GATEWAY...",
-      "SYS: PACKETIZING DATA (Sender: $name)...",
-      "SYS: ENVELOPE SECURED. SHIELD 200 OK.",
-      "TRANSMISSION COMPLETE. LAUNCHING MAIL CLIENT...",
-    ];
-
-    _transmissionTimer = Timer.periodic(const Duration(milliseconds: 150), (
-      timer,
-    ) {
-      if (!mounted) return;
-      setState(() {
-        if (_logIndex < steps.length) {
-          _transmissionLogs.add(steps[_logIndex]);
-          _logIndex++;
-          if (_logIndex == steps.length) {
-            _transmissionCompleted = true;
-          }
-        } else {
-          _transmissionTimer?.cancel();
-          _launchSubmittedEmail(name, email, message);
-          Timer(const Duration(seconds: 2), () {
-            if (!mounted) return;
-            setState(() {
-              _isTransmitting = false;
-              _transmissionCompleted = false;
-              _nameController.clear();
-              _emailController.clear();
-              _messageController.clear();
-            });
-          });
-        }
-      });
-    });
-  }
-
-  void _launchSubmittedEmail(String name, String email, String message) async {
-    final Uri url = Uri(
-      scheme: 'mailto',
-      path: 'vishnu_vs@ahalia.ac.in',
-      queryParameters: {
-        'subject': 'Portfolio Message from $name',
-        'body': 'Name: $name\nEmail: $email\n\nMessage:\n$message',
-      },
-    );
+  void _launchPhone() async {
+    final Uri url = Uri.parse('tel:+918778944493');
     if (!await launchUrl(url)) {
-      debugPrint("Failed to launch Email composer");
+      debugPrint("Failed to launch Phone dialer");
     }
   }
 
@@ -1454,24 +1382,7 @@ class _PortfolioShellState extends State<PortfolioShell>
         children: [
           _buildModuleTitle("05 // CONNECT_LINK", "GET IN TOUCH"),
           const SizedBox(height: 20.0),
-          isMobile
-              ? Column(
-                  children: [
-                    _buildMiniContactInfo(),
-                    const SizedBox(height: 16.0),
-                    _buildTransmissionForm(),
-                  ],
-                )
-              : IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(flex: 4, child: _buildMiniContactInfo()),
-                      const SizedBox(width: 24.0),
-                      Expanded(flex: 6, child: _buildTransmissionForm()),
-                    ],
-                  ),
-                ),
+          _buildMiniContactInfo(),
         ],
       ),
     );
@@ -1512,6 +1423,13 @@ class _PortfolioShellState extends State<PortfolioShell>
             "ELECTRONIC MAIL",
             "vishnu_vs@ahalia.ac.in",
             _launchEmail,
+          ),
+          const SizedBox(height: 12.0),
+          _buildContactRow(
+            Icons.phone,
+            "TELEPHONE CONNECTION",
+            "+91 87789 44493",
+            _launchPhone,
           ),
         ],
       ),
@@ -1568,221 +1486,7 @@ class _PortfolioShellState extends State<PortfolioShell>
     );
   }
 
-  Widget _buildTransmissionForm() {
-    return GlassCard(
-      child: Stack(
-        children: [
-          Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTextInputField(
-                  label: "YOUR NAME",
-                  controller: _nameController,
-                  validator: (val) => val == null || val.isEmpty
-                      ? "Name parameter required."
-                      : null,
-                ),
-                const SizedBox(height: 16.0),
-                _buildTextInputField(
-                  label: "YOUR EMAIL",
-                  controller: _emailController,
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return "Email parameter required.";
-                    }
-                    if (!RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    ).hasMatch(val)) {
-                      return "Invalid email format.";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                _buildTextInputField(
-                  label: "MESSAGE PAYLOAD",
-                  controller: _messageController,
-                  maxLines: 3,
-                  validator: (val) => val == null || val.isEmpty
-                      ? "Message details required."
-                      : null,
-                ),
-                const SizedBox(height: 24.0),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 14.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                    ),
-                    onPressed: _isTransmitting
-                        ? null
-                        : _startTransmissionSequence,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.send_outlined, size: 14),
-                        const SizedBox(width: 8),
-                        Text(
-                          "TRANSMIT PROTOCOL",
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_isTransmitting)
-            Positioned.fill(
-              child: GlassCard(
-                borderRadius: 12.0,
-                blur: 15.0,
-                isHoverable: false,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        _transmissionCompleted
-                            ? const Icon(
-                                Icons.check_circle_outline,
-                                color: Colors.greenAccent,
-                                size: 16.0,
-                              )
-                            : const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.0,
-                                  color: Colors.white,
-                                ),
-                              ),
-                        const SizedBox(width: 12),
-                        Text(
-                          _transmissionCompleted
-                              ? "TRANSMISSION COMPLETE"
-                              : "TRANSMITTING PAYLOAD...",
-                          style: GoogleFonts.outfit(
-                            color: _transmissionCompleted
-                                ? Colors.greenAccent
-                                : Colors.white,
-                            fontSize: 13.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16.0),
-                    Expanded(
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: ListView.builder(
-                          itemCount: _transmissionLogs.length,
-                          itemBuilder: (context, index) {
-                            final log = _transmissionLogs[index];
-                            final isDone = log.contains("COMPLETE");
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 6.0),
-                              child: Text(
-                                log,
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: isDone ? Colors.white : Colors.white30,
-                                  fontSize: 11.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildTextInputField({
-    required String label,
-    required TextEditingController controller,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.outfit(
-            color: Colors.white30,
-            fontSize: 9.5,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 6.0),
-        TextFormField(
-          controller: controller,
-          maxLines: maxLines,
-          validator: validator,
-          style: GoogleFonts.plusJakartaSans(
-            color: Colors.white,
-            fontSize: 13.0,
-            fontWeight: FontWeight.bold,
-          ),
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14.0,
-              vertical: 14.0,
-            ),
-            filled: true,
-            fillColor: Colors.white.withOpacity(0.02),
-            errorStyle: GoogleFonts.plusJakartaSans(
-              color: Colors.redAccent,
-              fontSize: 10.0,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.04)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              borderSide: const BorderSide(color: Colors.redAccent, width: 1.0),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              borderSide: const BorderSide(color: Colors.redAccent, width: 1.2),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   // CORE TITLES PAINTER
   Widget _buildModuleTitle(String numLabel, String title) {
