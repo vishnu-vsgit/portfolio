@@ -30,11 +30,12 @@ class _ThreeDGlobeState extends State<ThreeDGlobe> with SingleTickerProviderStat
   final List<GlobePoint> _points = [];
   final int _latSegments = 10;
   final int _longSegments = 14;
-  final double _radius = 120.0;
+  late double _radius;
 
   @override
   void initState() {
     super.initState();
+    _radius = widget.size / 2.6; // Dynamic scale radius to fit size boundaries
     
     // Generate grid points on the sphere surface
     for (int lat = 0; lat <= _latSegments; lat++) {
@@ -123,6 +124,7 @@ class _ThreeDGlobeState extends State<ThreeDGlobe> with SingleTickerProviderStat
           longSegments: _longSegments,
           primaryColor: widget.primaryColor,
           secondaryColor: widget.secondaryColor,
+          radius: _radius,
         ),
       ),
     );
@@ -151,6 +153,7 @@ class _GlobePainter extends CustomPainter {
   final int _longSegments;
   final Color primaryColor;
   final Color secondaryColor;
+  final double radius;
 
   _GlobePainter({
     required this.points,
@@ -160,6 +163,7 @@ class _GlobePainter extends CustomPainter {
     required int longSegments,
     required this.primaryColor,
     required this.secondaryColor,
+    required this.radius,
   }) : _longSegments = longSegments;
 
   @override

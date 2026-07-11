@@ -66,7 +66,7 @@ class _PortfolioShellState extends State<PortfolioShell>
     "WEB DEVELOPER",
     "6G NETWORK RESEARCHER",
     "IEDC STUDENT LEAD 2025-26",
-    "UI/UX GRAPHIC DESIGNER",
+    "UI/UX DESIGNER",
   ];
 
   // Contact Form parameters
@@ -75,6 +75,7 @@ class _PortfolioShellState extends State<PortfolioShell>
   final _emailController = TextEditingController();
   final _messageController = TextEditingController();
   bool _isTransmitting = false;
+  bool _transmissionCompleted = false;
   final List<String> _transmissionLogs = [];
   Timer? _transmissionTimer;
   int _logIndex = 0;
@@ -105,10 +106,10 @@ class _PortfolioShellState extends State<PortfolioShell>
       description:
           "Crafting modern vector layouts, typography hierarchies, and premium user interfaces.",
       skills: [
-        "UI/UX Prototyping",
+        "Figma Interaction Design",
         "Vector Illustration",
-        "Canva Graphics Design",
-        "Raster Manipulation",
+        "Adobe Creative Suite",
+        "Design System Mapping",
         "Color Harmony Mapping",
       ],
     ),
@@ -162,17 +163,27 @@ class _PortfolioShellState extends State<PortfolioShell>
   }
 
   void _onScroll() {
-    double scrollOffset = _scrollController.offset;
-    if (scrollOffset < 300) {
-      if (_activeNavIndex != 0) setState(() => _activeNavIndex = 0);
-    } else if (scrollOffset < 750) {
-      if (_activeNavIndex != 1) setState(() => _activeNavIndex = 1);
-    } else if (scrollOffset < 1400) {
-      if (_activeNavIndex != 2) setState(() => _activeNavIndex = 2);
-    } else if (scrollOffset < 1850) {
-      if (_activeNavIndex != 3) setState(() => _activeNavIndex = 3);
-    } else {
-      if (_activeNavIndex != 4) setState(() => _activeNavIndex = 4);
+    if (!mounted) return;
+    final keys = [_aboutKey, _projectsKey, _timelineKey, _skillsKey, _contactKey];
+    int activeIndex = _activeNavIndex;
+    double minDistance = double.infinity;
+
+    for (int i = 0; i < keys.length; i++) {
+      final context = keys[i].currentContext;
+      if (context != null) {
+        final box = context.findRenderObject() as RenderBox?;
+        if (box != null) {
+          final position = box.localToGlobal(Offset.zero);
+          final distance = position.dy.abs();
+          if (distance < minDistance) {
+            minDistance = distance;
+            activeIndex = i;
+          }
+        }
+      }
+    }
+    if (_activeNavIndex != activeIndex) {
+      setState(() => _activeNavIndex = activeIndex);
     }
   }
 
@@ -249,8 +260,13 @@ class _PortfolioShellState extends State<PortfolioShell>
   void _startTransmissionSequence() {
     if (!_formKey.currentState!.validate()) return;
 
+    final String name = _nameController.text;
+    final String email = _emailController.text;
+    final String message = _messageController.text;
+
     setState(() {
       _isTransmitting = true;
+      _transmissionCompleted = false;
       _transmissionLogs.clear();
       _transmissionLogs.add("SYS: INITIALIZING SECURE COMMUNICATION...");
       _logIndex = 0;
@@ -259,12 +275,12 @@ class _PortfolioShellState extends State<PortfolioShell>
     final steps = [
       "SYS: GENERATING RSA-4096 CONDUIT SIGNATURE...",
       "SYS: SHAKING HANDS WITH ROUTER GATEWAY...",
-      "SYS: PACKETIZING DATA (Sender: ${_nameController.text})...",
+      "SYS: PACKETIZING DATA (Sender: $name)...",
       "SYS: ENVELOPE SECURED. SHIELD 200 OK.",
-      "TRANSMISSION COMPLETE. RESPONDING SHORTLY.",
+      "TRANSMISSION COMPLETE. LAUNCHING MAIL CLIENT...",
     ];
 
-    _transmissionTimer = Timer.periodic(const Duration(milliseconds: 300), (
+    _transmissionTimer = Timer.periodic(const Duration(milliseconds: 150), (
       timer,
     ) {
       if (!mounted) return;
@@ -272,12 +288,17 @@ class _PortfolioShellState extends State<PortfolioShell>
         if (_logIndex < steps.length) {
           _transmissionLogs.add(steps[_logIndex]);
           _logIndex++;
+          if (_logIndex == steps.length) {
+            _transmissionCompleted = true;
+          }
         } else {
           _transmissionTimer?.cancel();
+          _launchSubmittedEmail(name, email, message);
           Timer(const Duration(seconds: 2), () {
             if (!mounted) return;
             setState(() {
               _isTransmitting = false;
+              _transmissionCompleted = false;
               _nameController.clear();
               _emailController.clear();
               _messageController.clear();
@@ -286,6 +307,20 @@ class _PortfolioShellState extends State<PortfolioShell>
         }
       });
     });
+  }
+
+  void _launchSubmittedEmail(String name, String email, String message) async {
+    final Uri url = Uri(
+      scheme: 'mailto',
+      path: 'vishnu_vs@ahalia.ac.in',
+      queryParameters: {
+        'subject': 'Portfolio Message from $name',
+        'body': 'Name: $name\nEmail: $email\n\nMessage:\n$message',
+      },
+    );
+    if (!await launchUrl(url)) {
+      debugPrint("Failed to launch Email composer");
+    }
   }
 
   void _launchLinkedIn() async {
@@ -343,188 +378,203 @@ class _PortfolioShellState extends State<PortfolioShell>
               right: BorderSide(color: Colors.white.withOpacity(0.04)),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar with rotating halo simulation
-              Center(
-                child: Container(
-                  width: 130.0,
-                  height: 130.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white12, width: 1.5),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
                   ),
-                  child: Center(
-                    child: Container(
-                      width: 110.0,
-                      height: 110.0,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.03),
-                      ),
-                      child: ClipOval(
-                        child: Image.asset(
-                          "assets/profile.png",
-                          width: 110.0,
-                          height: 110.0,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: Text(
-                                "VS",
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 42.0,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.0,
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Avatar with rotating halo simulation
+                        Center(
+                          child: Container(
+                            width: 130.0,
+                            height: 130.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white12, width: 1.5),
+                            ),
+                            child: Center(
+                              child: Container(
+                                width: 110.0,
+                                height: 110.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withOpacity(0.03),
+                                ),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    "assets/profile.png",
+                                    width: 110.0,
+                                    height: 110.0,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Center(
+                                        child: Text(
+                                          "VS",
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 42.0,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.0,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32.0),
-
-              // Name & Tag
-              Text(
-                "VISHNU VS",
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.0,
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                "B.Tech CSE Student & Developer",
-                style: GoogleFonts.outfit(
-                  color: Colors.white70,
-                  fontSize: 13.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-
-              // Typewriter effect status
-              Row(
-                children: [
-                  Text(
-                    "> ",
-                    style: GoogleFonts.outfit(
-                      color: Colors.white30,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      _currentDisplayText,
-                      style: GoogleFonts.outfit(
-                        color: Colors.white.withOpacity(0.85),
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Text(
-                    "|",
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24.0),
-
-              // Status Pill
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10.0,
-                  vertical: 6.0,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  color: Colors.white.withOpacity(0.04),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.white54,
-                            blurRadius: 4,
-                            spreadRadius: 1,
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 32.0),
+
+                        // Name & Tag
+                        Text(
+                          "VISHNU VS",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 30.0,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 4.0),
+                        Text(
+                          "B.Tech CSE Student & Developer",
+                          style: GoogleFonts.outfit(
+                            color: Colors.white70,
+                            fontSize: 13.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16.0),
+
+                        // Typewriter effect status
+                        Row(
+                          children: [
+                            Text(
+                              "> ",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white30,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                _currentDisplayText,
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white.withOpacity(0.85),
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              "|",
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24.0),
+
+                        // Status Pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0,
+                            vertical: 6.0,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20.0),
+                            color: Colors.white.withOpacity(0.04),
+                            border: Border.all(color: Colors.white.withOpacity(0.08)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.white54,
+                                      blurRadius: 4,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "AVAILABLE FOR WORK",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 10.0,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16.0),
+                        const Spacer(),
+
+                        // Left navigation shortcuts
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDesktopNavItem("01 // ARCHIVE_BIO", 0, _aboutKey),
+                            _buildDesktopNavItem("02 // PORTFOLIO_GRID", 1, _projectsKey),
+                            _buildDesktopNavItem("03 // JOURNEY_LINE", 2, _timelineKey),
+                            _buildDesktopNavItem("04 // SYSTEM_SKILLS", 3, _skillsKey),
+                            _buildDesktopNavItem("05 // CONTACT_LINK", 4, _contactKey),
+                          ],
+                        ),
+                        const SizedBox(height: 16.0),
+                        const Spacer(),
+
+                        // Social connections
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.link,
+                                color: Colors.white70,
+                                size: 20,
+                              ),
+                              onPressed: _launchLinkedIn,
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.email_outlined,
+                                color: Colors.white70,
+                                size: 20,
+                              ),
+                              onPressed: _launchEmail,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "AVAILABLE FOR WORK",
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 10.0,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              const Spacer(),
-
-              // Left navigation shortcuts
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDesktopNavItem("01 // ARCHIVE_BIO", 0, _aboutKey),
-                  _buildDesktopNavItem("02 // PORTFOLIO_GRID", 1, _projectsKey),
-                  _buildDesktopNavItem("03 // JOURNEY_LINE", 2, _timelineKey),
-                  _buildDesktopNavItem("04 // SYSTEM_SKILLS", 3, _skillsKey),
-                  _buildDesktopNavItem("05 // CONTACT_LINK", 4, _contactKey),
-                ],
-              ),
-              const Spacer(),
-
-              // Social connections
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.link,
-                      color: Colors.white70,
-                      size: 20,
-                    ),
-                    onPressed: _launchLinkedIn,
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.email_outlined,
-                      color: Colors.white70,
-                      size: 20,
-                    ),
-                    onPressed: _launchEmail,
-                  ),
-                ],
-              ),
-            ],
+              );
+            },
           ),
         ),
 
@@ -615,7 +665,7 @@ class _PortfolioShellState extends State<PortfolioShell>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 12.0),
+                const SizedBox(height: 16.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -668,7 +718,7 @@ class _PortfolioShellState extends State<PortfolioShell>
             Text(
               label,
               style: GoogleFonts.outfit(
-                color: isActive ? Colors.white : Colors.white24,
+                color: isActive ? Colors.white : Colors.white54,
                 fontSize: 11.5,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.0,
@@ -848,20 +898,24 @@ class _PortfolioShellState extends State<PortfolioShell>
         title: "Visual Compiler",
         subtitle: "Layout Engine & LLM Guardrails // Mini Project",
         description:
-            "A canvas-based editor that lets developers compile visual UI mockups into clean codebase templates.Reduce hallucinations.",
+            "A canvas-based editor that lets developers compile visual UI mockups into clean codebase templates.",
         accomplishments: [
-          "Designed custom visual layout generation engine.",
-          "Reduced compiler generation hallucinations by 80%.",
+          "Engineered a custom canvas-to-code layout engine that compiles visual UI mockups into clean, responsive templates.",
+          "Decreased layout generation hallucinations by 80% through target-constrained parsing rules.",
         ],
         technologies: ["Flutter", "Dart", "Python"],
         icon: Icons.code,
+        githubUrl: "https://github.com/vishnu-vsgit/portfolio",
       ),
       ProjectDetail(
         title: "AV Perception",
         subtitle: "AI Perception & Edge Privacy // Internship Project",
         description:
             "Worked on an AI research project focused on autonomous vehicle perception, centralized learning, and data anonymization at AI NEST Research Lab, Amrita Vishwa Vidyapeetham.",
-        accomplishments: ["Learned AI research methodologies."],
+        accomplishments: [
+          "Developed edge-anonymization camera pipelines using PyTorch to secure local vehicle telemetry data.",
+          "Optimized model inference constraints for real-time operation on low-power edge compute hardware.",
+        ],
         technologies: [
           "Vision AI",
           "PyTorch",
@@ -875,7 +929,10 @@ class _PortfolioShellState extends State<PortfolioShell>
         subtitle: "Predictive Control // Active R&D Project",
         description:
             "A Multi-Agent Framework for network slicing, Congestion Prediction and Prevention.",
-        accomplishments: ["On Development."],
+        accomplishments: [
+          "Modeling a predictive multi-agent reinforcement learning (MARL) framework for dynamic spectral allocation.",
+          "Designing congestion prediction layers to minimize routing latency under sudden spectra load spikes.",
+        ],
         technologies: ["6G networks", "Network Routing"],
         icon: Icons.settings_input_antenna,
       ),
@@ -953,6 +1010,37 @@ class _PortfolioShellState extends State<PortfolioShell>
                 ],
               ),
             ),
+            if (project.githubUrl != null || project.liveUrl != null) ...[
+              const SizedBox(width: 8.0),
+              if (project.githubUrl != null)
+                IconButton(
+                  icon: const Icon(Icons.code, size: 18, color: Colors.white70),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () async {
+                    final Uri url = Uri.parse(project.githubUrl!);
+                    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                      debugPrint("Failed to launch GitHub URL");
+                    }
+                  },
+                  tooltip: "View Source Code",
+                ),
+              if (project.liveUrl != null) ...[
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: const Icon(Icons.open_in_new, size: 18, color: Colors.white70),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () async {
+                    final Uri url = Uri.parse(project.liveUrl!);
+                    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                      debugPrint("Failed to launch Live URL");
+                    }
+                  },
+                  tooltip: "View Live Demo",
+                ),
+              ],
+            ],
           ],
         ),
         const SizedBox(height: 16.0),
@@ -994,7 +1082,7 @@ class _PortfolioShellState extends State<PortfolioShell>
               ],
             ),
           );
-        }).toList(),
+        }),
         if (!isMobile) const Spacer(),
         const SizedBox(height: 14.0),
         Wrap(
@@ -1118,7 +1206,7 @@ class _PortfolioShellState extends State<PortfolioShell>
                                 Text(
                                   item.duration,
                                   style: GoogleFonts.outfit(
-                                    color: Colors.white30,
+                                    color: Colors.white54,
                                     fontSize: 11.0,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -1203,7 +1291,7 @@ class _PortfolioShellState extends State<PortfolioShell>
                 children: [
                   Icon(
                     category.icon,
-                    color: isSelected ? Colors.white : Colors.white30,
+                    color: isSelected ? Colors.white : Colors.white54,
                     size: 20,
                   ),
                   const SizedBox(width: 14.0),
@@ -1222,7 +1310,7 @@ class _PortfolioShellState extends State<PortfolioShell>
                         Text(
                           category.description,
                           style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white30,
+                            color: Colors.white54,
                             fontSize: 10.5,
                           ),
                           maxLines: 1,
@@ -1424,7 +1512,7 @@ class _PortfolioShellState extends State<PortfolioShell>
                   Text(
                     title,
                     style: GoogleFonts.outfit(
-                      color: Colors.white30,
+                      color: Colors.white54,
                       fontSize: 9.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1469,8 +1557,9 @@ class _PortfolioShellState extends State<PortfolioShell>
                   label: "YOUR EMAIL",
                   controller: _emailController,
                   validator: (val) {
-                    if (val == null || val.isEmpty)
+                    if (val == null || val.isEmpty) {
                       return "Email parameter required.";
+                    }
                     if (!RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     ).hasMatch(val)) {
@@ -1534,19 +1623,29 @@ class _PortfolioShellState extends State<PortfolioShell>
                   children: [
                     Row(
                       children: [
-                        const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            color: Colors.white,
-                          ),
-                        ),
+                        _transmissionCompleted
+                            ? const Icon(
+                                Icons.check_circle_outline,
+                                color: Colors.greenAccent,
+                                size: 16.0,
+                              )
+                            : const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.0,
+                                  color: Colors.white,
+                                ),
+                              ),
                         const SizedBox(width: 12),
                         Text(
-                          "TRANSMITTING PAYLOAD...",
+                          _transmissionCompleted
+                              ? "TRANSMISSION COMPLETE"
+                              : "TRANSMITTING PAYLOAD...",
                           style: GoogleFonts.outfit(
-                            color: Colors.white,
+                            color: _transmissionCompleted
+                                ? Colors.greenAccent
+                                : Colors.white,
                             fontSize: 13.0,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1692,6 +1791,8 @@ class ProjectDetail {
   final List<String> accomplishments;
   final List<String> technologies;
   final IconData icon;
+  final String? githubUrl;
+  final String? liveUrl;
 
   const ProjectDetail({
     required this.title,
@@ -1700,6 +1801,8 @@ class ProjectDetail {
     required this.accomplishments,
     required this.technologies,
     required this.icon,
+    this.githubUrl,
+    this.liveUrl,
   });
 }
 
