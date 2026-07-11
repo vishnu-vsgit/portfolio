@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'widgets/warp_grid_background.dart';
 import 'widgets/glass_card.dart';
-import 'widgets/design_carousel.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,7 +49,6 @@ class _PortfolioShellState extends State<PortfolioShell>
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _aboutKey = GlobalKey();
   final GlobalKey _projectsKey = GlobalKey();
-  final GlobalKey _designsKey = GlobalKey();
   final GlobalKey _timelineKey = GlobalKey();
   final GlobalKey _skillsKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
@@ -161,7 +159,6 @@ class _PortfolioShellState extends State<PortfolioShell>
         _projectsKey,
         _timelineKey,
         _skillsKey,
-        _designsKey,
         _contactKey,
       ];
       int activeIndex = _activeNavIndex;
@@ -565,13 +562,8 @@ class _PortfolioShellState extends State<PortfolioShell>
                               _skillsKey,
                             ),
                             _buildDesktopNavItem(
-                              "05 // DESIGN_STACK",
+                              "05 // CONTACT_LINK",
                               4,
-                              _designsKey,
-                            ),
-                            _buildDesktopNavItem(
-                              "06 // CONTACT_LINK",
-                              5,
                               _contactKey,
                             ),
                           ],
@@ -627,8 +619,6 @@ class _PortfolioShellState extends State<PortfolioShell>
                 _buildTimelineModule(false),
                 const SizedBox(height: 64.0),
                 _buildSkillsModule(false),
-                const SizedBox(height: 64.0),
-                _buildDesignsModule(false),
                 const SizedBox(height: 64.0),
                 _buildContactModule(false),
               ],
@@ -723,8 +713,6 @@ class _PortfolioShellState extends State<PortfolioShell>
           _buildTimelineModule(true),
           const SizedBox(height: 32.0),
           _buildSkillsModule(true),
-          const SizedBox(height: 32.0),
-          _buildDesignsModule(true),
           const SizedBox(height: 32.0),
           _buildContactModule(true),
           const SizedBox(height: 48.0),
@@ -871,7 +859,7 @@ class _PortfolioShellState extends State<PortfolioShell>
           const SizedBox(height: 14.0),
           _buildMiniProgress("GRAPHIC DESIGN (UI/UX)", 0.92, 0.8),
           const SizedBox(height: 14.0),
-          _buildMiniProgress("AI & COMPILER DESIGN", 0.88, 0.6),
+          _buildMiniProgress("AI & COMPUTER NETWORKING", 0.88, 0.6),
           const SizedBox(height: 14.0),
           _buildMiniProgress("OPERATIONS & LEADERSHIP", 0.98, 0.4),
         ],
@@ -1002,19 +990,7 @@ class _PortfolioShellState extends State<PortfolioShell>
     );
   }
 
-  Widget _buildDesignsModule(bool isMobile) {
-    return Container(
-      key: _designsKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildModuleTitle("03 // CREATIVE_WORKS", "UI/UX & GRAPHIC DESIGNS"),
-          const SizedBox(height: 20.0),
-          DesignCarousel(isMobile: isMobile),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildProjectCard(ProjectDetail project, bool isMobile) {
     Widget content = Column(
