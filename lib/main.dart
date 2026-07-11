@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'widgets/three_d_particles.dart';
-import 'widgets/aurora_background.dart';
+import 'widgets/warp_grid_background.dart';
 import 'widgets/glass_card.dart';
+import 'widgets/design_carousel.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +50,7 @@ class _PortfolioShellState extends State<PortfolioShell>
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _aboutKey = GlobalKey();
   final GlobalKey _projectsKey = GlobalKey();
+  final GlobalKey _designsKey = GlobalKey();
   final GlobalKey _timelineKey = GlobalKey();
   final GlobalKey _skillsKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
@@ -94,9 +95,7 @@ class _PortfolioShellState extends State<PortfolioShell>
           "Building production-grade web systems and responsive core frontends.",
       skills: [
         "Flutter Web & Dart",
-        "JavaScript / ES6",
-        "HTML5 & Vanilla CSS",
-        "REST API Architectures",
+        " API Architectures",
         "Git & Deployment Modules",
       ],
     ),
@@ -105,13 +104,7 @@ class _PortfolioShellState extends State<PortfolioShell>
       icon: Icons.design_services,
       description:
           "Crafting modern vector layouts, typography hierarchies, and premium user interfaces.",
-      skills: [
-        "Figma Interaction Design",
-        "Vector Illustration",
-        "Adobe Creative Suite",
-        "Design System Mapping",
-        "Color Harmony Mapping",
-      ],
+      skills: ["Figma Design", "Logo Design", "Web-App Prototyping"],
     ),
     SkillCategoryDetail(
       name: "AI & Computational CSE",
@@ -119,10 +112,9 @@ class _PortfolioShellState extends State<PortfolioShell>
       description:
           "Developing intelligent agent pipelines and high-speed compiler architectures.",
       skills: [
-        "Visual Compilers",
         "Computer Vision Basics",
         "Centralized Learning Networks",
-        "Graph Congestion Control",
+        "Graph Algorithms",
         "Python Core Modules",
       ],
     ),
@@ -132,11 +124,10 @@ class _PortfolioShellState extends State<PortfolioShell>
       description:
           "Managing technical operations, mentoring engineering projects, and hosting tech bootcamps.",
       skills: [
-        "IEDC Operations (2025-26)",
-        "Project Leadership",
-        "Public Presentation",
+        "IEDC (2025-26)",
+        "Team Leadership",
+        "Public Speaking",
         "Event Coordination",
-        "Agile Team Sprints",
       ],
     ),
   ];
@@ -164,31 +155,45 @@ class _PortfolioShellState extends State<PortfolioShell>
 
   void _onScroll() {
     if (!mounted) return;
-    final keys = [_aboutKey, _projectsKey, _timelineKey, _skillsKey, _contactKey];
-    int activeIndex = _activeNavIndex;
-    double minDistance = double.infinity;
+    try {
+      final keys = [
+        _aboutKey,
+        _projectsKey,
+        _timelineKey,
+        _skillsKey,
+        _designsKey,
+        _contactKey,
+      ];
+      int activeIndex = _activeNavIndex;
+      double minDistance = double.infinity;
 
-    for (int i = 0; i < keys.length; i++) {
-      final context = keys[i].currentContext;
-      if (context != null) {
-        final box = context.findRenderObject() as RenderBox?;
-        if (box != null) {
-          final position = box.localToGlobal(Offset.zero);
-          final distance = position.dy.abs();
-          if (distance < minDistance) {
-            minDistance = distance;
-            activeIndex = i;
+      for (int i = 0; i < keys.length; i++) {
+        final key = keys[i];
+        if (key.currentContext == null) continue;
+        final context = key.currentContext;
+        if (context != null) {
+          final box = context.findRenderObject() as RenderBox?;
+          if (box != null) {
+            final position = box.localToGlobal(Offset.zero);
+            final distance = position.dy.abs();
+            if (distance < minDistance) {
+              minDistance = distance;
+              activeIndex = i;
+            }
           }
         }
       }
-    }
-    if (_activeNavIndex != activeIndex) {
-      setState(() => _activeNavIndex = activeIndex);
+      if (_activeNavIndex != activeIndex) {
+        setState(() => _activeNavIndex = activeIndex);
+      }
+    } catch (e) {
+      debugPrint("Scroll listener state error: $e");
     }
   }
 
   void _scrollToKey(GlobalKey key, int navIndex) {
     setState(() => _activeNavIndex = navIndex);
+    if (key.currentContext == null) return;
     final context = key.currentContext;
     if (context != null) {
       Scrollable.ensureVisible(
@@ -349,9 +354,7 @@ class _PortfolioShellState extends State<PortfolioShell>
         child: Stack(
           children: [
             // Background Canvas System
-            Positioned.fill(
-              child: AuroraBackground(child: const ThreeDParticleBackground()),
-            ),
+            Positioned.fill(child: const WarpGridBackground()),
 
             // Main Layout Viewport
             Positioned.fill(
@@ -382,9 +385,7 @@ class _PortfolioShellState extends State<PortfolioShell>
             builder: (context, constraints) {
               return SingleChildScrollView(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: IntrinsicHeight(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,7 +397,10 @@ class _PortfolioShellState extends State<PortfolioShell>
                             height: 130.0,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white12, width: 1.5),
+                              border: Border.all(
+                                color: Colors.white12,
+                                width: 1.5,
+                              ),
                             ),
                             child: Center(
                               child: Container(
@@ -498,7 +502,9 @@ class _PortfolioShellState extends State<PortfolioShell>
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20.0),
                             color: Colors.white.withOpacity(0.04),
-                            border: Border.all(color: Colors.white.withOpacity(0.08)),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.08),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -538,11 +544,36 @@ class _PortfolioShellState extends State<PortfolioShell>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDesktopNavItem("01 // ARCHIVE_BIO", 0, _aboutKey),
-                            _buildDesktopNavItem("02 // PORTFOLIO_GRID", 1, _projectsKey),
-                            _buildDesktopNavItem("03 // JOURNEY_LINE", 2, _timelineKey),
-                            _buildDesktopNavItem("04 // SYSTEM_SKILLS", 3, _skillsKey),
-                            _buildDesktopNavItem("05 // CONTACT_LINK", 4, _contactKey),
+                            _buildDesktopNavItem(
+                              "01 // ARCHIVE_BIO",
+                              0,
+                              _aboutKey,
+                            ),
+                            _buildDesktopNavItem(
+                              "02 // PORTFOLIO_GRID",
+                              1,
+                              _projectsKey,
+                            ),
+                            _buildDesktopNavItem(
+                              "03 // JOURNEY_LINE",
+                              2,
+                              _timelineKey,
+                            ),
+                            _buildDesktopNavItem(
+                              "04 // SYSTEM_SKILLS",
+                              3,
+                              _skillsKey,
+                            ),
+                            _buildDesktopNavItem(
+                              "05 // DESIGN_STACK",
+                              4,
+                              _designsKey,
+                            ),
+                            _buildDesktopNavItem(
+                              "06 // CONTACT_LINK",
+                              5,
+                              _contactKey,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16.0),
@@ -596,6 +627,8 @@ class _PortfolioShellState extends State<PortfolioShell>
                 _buildTimelineModule(false),
                 const SizedBox(height: 64.0),
                 _buildSkillsModule(false),
+                const SizedBox(height: 64.0),
+                _buildDesignsModule(false),
                 const SizedBox(height: 64.0),
                 _buildContactModule(false),
               ],
@@ -690,6 +723,8 @@ class _PortfolioShellState extends State<PortfolioShell>
           _buildTimelineModule(true),
           const SizedBox(height: 32.0),
           _buildSkillsModule(true),
+          const SizedBox(height: 32.0),
+          _buildDesignsModule(true),
           const SizedBox(height: 32.0),
           _buildContactModule(true),
           const SizedBox(height: 48.0),
@@ -926,14 +961,11 @@ class _PortfolioShellState extends State<PortfolioShell>
       ),
       ProjectDetail(
         title: "6G Congestion Control",
-        subtitle: "Predictive Control // Active R&D Project",
+        subtitle: "Active R&D Project",
         description:
-            "A Multi-Agent Framework for network slicing, Congestion Prediction and Prevention.",
-        accomplishments: [
-          "Modeling a predictive multi-agent reinforcement learning (MARL) framework for dynamic spectral allocation.",
-          "Designing congestion prediction layers to minimize routing latency under sudden spectra load spikes.",
-        ],
-        technologies: ["6G networks", "Network Routing"],
+            "This project is currently under active development. Detailed specifications and modules will be updated here soon.",
+        accomplishments: [],
+        technologies: ["6G Networks", "R&D"],
         icon: Icons.settings_input_antenna,
       ),
     ];
@@ -965,6 +997,20 @@ class _PortfolioShellState extends State<PortfolioShell>
                     );
                   }).toList(),
                 ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesignsModule(bool isMobile) {
+    return Container(
+      key: _designsKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildModuleTitle("03 // CREATIVE_WORKS", "UI/UX & GRAPHIC DESIGNS"),
+          const SizedBox(height: 20.0),
+          DesignCarousel(isMobile: isMobile),
         ],
       ),
     );
@@ -1019,7 +1065,10 @@ class _PortfolioShellState extends State<PortfolioShell>
                   constraints: const BoxConstraints(),
                   onPressed: () async {
                     final Uri url = Uri.parse(project.githubUrl!);
-                    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                    if (!await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    )) {
                       debugPrint("Failed to launch GitHub URL");
                     }
                   },
@@ -1028,12 +1077,19 @@ class _PortfolioShellState extends State<PortfolioShell>
               if (project.liveUrl != null) ...[
                 const SizedBox(width: 10),
                 IconButton(
-                  icon: const Icon(Icons.open_in_new, size: 18, color: Colors.white70),
+                  icon: const Icon(
+                    Icons.open_in_new,
+                    size: 18,
+                    color: Colors.white70,
+                  ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   onPressed: () async {
                     final Uri url = Uri.parse(project.liveUrl!);
-                    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                    if (!await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    )) {
                       debugPrint("Failed to launch Live URL");
                     }
                   },

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
@@ -29,9 +30,10 @@ class GlassCard extends StatefulWidget {
   State<GlassCard> createState() => _GlassCardState();
 }
 
-class _GlassCardState extends State<GlassCard> with SingleTickerProviderStateMixin {
+class _GlassCardState extends State<GlassCard> with TickerProviderStateMixin {
   bool _isHovered = false;
   late AnimationController _controller;
+  late AnimationController _borderController;
   late Animation<double> _scaleAnimation;
 
   @override
@@ -44,11 +46,17 @@ class _GlassCardState extends State<GlassCard> with SingleTickerProviderStateMix
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.025).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
+
+    _borderController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _borderController.dispose();
     super.dispose();
   }
 
@@ -85,21 +93,25 @@ class _GlassCardState extends State<GlassCard> with SingleTickerProviderStateMix
         cardContent,
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: GlassBorderPainter(
-                strokeWidth: widget.borderWidth,
-                radius: widget.borderRadius,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white.withOpacity(_isHovered ? 0.16 : 0.08),
-                    Colors.white.withOpacity(0.01),
-                    Colors.white.withOpacity(_isHovered ? 0.08 : 0.03),
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-              ),
+            child: AnimatedBuilder(
+              animation: _borderController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: GlassBorderPainter(
+                    strokeWidth: widget.borderWidth,
+                    radius: widget.borderRadius,
+                    gradient: SweepGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.04),
+                        Colors.white.withOpacity(_isHovered ? 0.35 : 0.15),
+                        Colors.white.withOpacity(0.04),
+                      ],
+                      stops: const [0.0, 0.5, 1.0],
+                      transform: GradientRotation(_borderController.value * 2.0 * math.pi),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),
