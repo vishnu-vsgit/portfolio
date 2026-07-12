@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'widgets/warp_grid_background.dart';
 import 'widgets/glass_card.dart';
+import 'widgets/holographic_skill_matrix.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,9 +73,6 @@ class _PortfolioShellState extends State<PortfolioShell>
 
   // Skills console state
   int _selectedSkillIndex = 0;
-  final List<String> _consoleLines = [];
-  Timer? _consoleTimer;
-  int _consoleLineIndex = 0;
 
   static const List<SkillCategoryDetail> _skillsCategories = [
     SkillCategoryDetail(
@@ -125,14 +123,12 @@ class _PortfolioShellState extends State<PortfolioShell>
   void initState() {
     super.initState();
     _startTypewriter();
-    _triggerConsoleLogs();
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _typewriterTimer.cancel();
-    _consoleTimer?.cancel();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -216,35 +212,7 @@ class _PortfolioShellState extends State<PortfolioShell>
     });
   }
 
-  void _triggerConsoleLogs() {
-    _consoleTimer?.cancel();
-    setState(() {
-      _consoleLines.clear();
-      _consoleLines.add("Initializing connection to abilities database...");
-      _consoleLines.add(
-        "SYS: LOAD_MODULE // CATEGORY: ${_skillsCategories[_selectedSkillIndex].name.toUpperCase()}",
-      );
-      _consoleLineIndex = 0;
-    });
-
-    final skillsList = _skillsCategories[_selectedSkillIndex].skills;
-    _consoleTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      if (!mounted) return;
-      setState(() {
-        if (_consoleLineIndex < skillsList.length) {
-          _consoleLines.add(
-            ">>> SYSTEM ACTIVE: ${skillsList[_consoleLineIndex]} ... [LOADED]",
-          );
-          _consoleLineIndex++;
-        } else if (_consoleLineIndex == skillsList.length) {
-          _consoleLines.add("Abilities compiled successfully.");
-          _consoleLines.add("STATUS: OPERATIONAL");
-          _consoleLineIndex++;
-          _consoleTimer?.cancel();
-        }
-      });
-    });
-  }
+  // Removed _triggerConsoleLogs since it is replaced by HolographicSkillMatrix animation
 
   void _launchPhone() async {
     final Uri url = Uri.parse('tel:+918778944493');
@@ -1240,7 +1208,6 @@ class _PortfolioShellState extends State<PortfolioShell>
             padding: EdgeInsets.zero,
             onTap: () {
               setState(() => _selectedSkillIndex = index);
-              _triggerConsoleLogs();
             },
             child: Container(
               padding: const EdgeInsets.all(16.0),
@@ -1346,26 +1313,9 @@ class _PortfolioShellState extends State<PortfolioShell>
               color: Colors.black.withOpacity(0.3),
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: ListView.builder(
-              itemCount: _consoleLines.length,
-              itemBuilder: (context, index) {
-                final line = _consoleLines[index];
-                final isLoaded =
-                    line.contains("LOADED") ||
-                    line.contains("OK") ||
-                    line.contains("STATUS");
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 6.0),
-                  child: Text(
-                    line,
-                    style: GoogleFonts.plusJakartaSans(
-                      color: isLoaded ? Colors.white : Colors.white30,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                );
-              },
+            child: HolographicSkillMatrix(
+              skills: _skillsCategories[_selectedSkillIndex].skills,
+              categoryIndex: _selectedSkillIndex,
             ),
           ),
         ],
